@@ -312,9 +312,9 @@ public class Peer {
 
 
 		System.out.println("Recap:");
-		System.out.println("My key: " + exchangeKey);
-		System.out.println("Their key: " + theirKey);
-		System.out.println("Our shared key: " + sharedKey);
+		System.out.println("My key (y1): " + exchangeKey);
+		System.out.println("Their key (y2): " + theirKey);
+		System.out.println("Our shared key (k): " + sharedKey);
 	}
 
 	/**
@@ -344,6 +344,7 @@ public class Peer {
          */
 
         send("PROP " + a + " " + n);
+		System.out.println("Proposal sent to passive peer (a = " + a + ", n = " + n + ")");
 
         /*
          * Exchange key
@@ -419,9 +420,9 @@ public class Peer {
 
 
                 System.out.println("Recap:");
-                System.out.println("My key: " + exchangeKey);
-                System.out.println("Their key: " + theirKey);
-                System.out.println("Our shared key: " + sharedKey);
+                System.out.println("My key (y1): " + exchangeKey);
+                System.out.println("Their key (y2): " + theirKey);
+                System.out.println("Our shared key (k): " + sharedKey);
 
             } else {
                 System.out.println("The proposal was not acknowledged.");
