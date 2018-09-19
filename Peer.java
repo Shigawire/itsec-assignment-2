@@ -248,11 +248,10 @@ public class Peer {
 	 */
 	private static void activeMode(String ip, int port) {
 
-        int a = 53;
-        int n = 123457;
-        SecureRandom x;
-
-        /* TODO: implement PRNG for a and n */
+        SecureRandom rng = new SecureRandom();
+        int a = rng.nextInt(10000) + 50;
+        int n = rng.nextInt(10000) + 50;
+        int x;
 
         connect(ip, port);
 
@@ -272,8 +271,7 @@ public class Peer {
             if (answer.equals("ACK")) {
                 System.out.println("The proposal of a and n was acknowledged.");
 
-                x = new SecureRandom();
-
+                x = rng.nextInt(50) + 50;
             } else {
                 System.out.println("The proposal was not acknowledged.");
             }
