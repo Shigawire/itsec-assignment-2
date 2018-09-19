@@ -308,7 +308,7 @@ public class Peer {
 			throw new IllegalArgumentException("Expected their key to be > 0");
 		}
 
-		long sharedKey = expmod(theirKey, ourKey, n);
+		long sharedKey = expmod(theirKey, x, n);
 
 
 		System.out.println("Recap:");
