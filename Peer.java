@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.security.SecureRandom;
 import java.util.StringTokenizer;
 
 /**
@@ -249,6 +250,8 @@ public class Peer {
 
         int a = 53;
         int n = 123457;
+        SecureRandom x;
+
         /* TODO: implement PRNG for a and n */
 
         connect(ip, port);
@@ -268,6 +271,9 @@ public class Peer {
 
             if (answer.equals("ACK")) {
                 System.out.println("The proposal of a and n was acknowledged.");
+
+                x = new SecureRandom();
+
             } else {
                 System.out.println("The proposal was not acknowledged.");
             }
