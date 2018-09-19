@@ -329,6 +329,10 @@ public class Peer {
 	private static void activeMode(String ip, int port) {
 
         SecureRandom rng = new SecureRandom();
+        // N = Prime number over 10.000
+		// A = Primitive root of N
+		// X = Prime number between 1 and N and GCD(X, N) = 1
+
         int a = rng.nextInt(10000) + 50;
         int n = rng.nextInt(10000) + 50;
         int x;
