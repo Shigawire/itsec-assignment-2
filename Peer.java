@@ -343,13 +343,66 @@ public class Peer {
             if (answer.equals("ACK")) {
                 System.out.println("The proposal of a and n was acknowledged.");
 
+
+
+
+                /*
+                    Now, create a secret x1
+                */
+
                 x = rng.nextInt(50) + 50;
 
-                long y = expmod(a, x, n);
+                System.out.println("My X is: " + x);
 
-                System.out.println("My exchange key Y is: " + y);
+                final long exchangeKey = expmod(a, x, n);
+                ourKey = exchangeKey;
 
-                send("KEY " + y);
+                System.out.println("My exchange key Y is: " + ourKey);
+
+                /*
+                    2 Threads: wait for their key and send out our key.
+                    Then join into main thread and wait.
+                */
+
+                Thread waitForTheirKeyThread = new Thread() {
+                    public void run() {
+                        try {
+                            String message = waitFor();
+                            if (!operation(message).equals("KEY")) {
+                                throw new IllegalArgumentException("Expected key payload.");
+                            }
+
+                            long key = Long.valueOf(tokenize(message, " ")[1]);
+                            setTheirKey(key);
+
+                        } catch(IOException e) {
+                            System.out.println("Error receiving data.");
+                            System.exit(1);
+                        }
+                    }
+                };
+
+                Thread sendOurKeyThread = new Thread() {
+                    public void run() {
+                        send("KEY " + exchangeKey);
+                    }
+                };
+
+                waitForTheirKeyThread.start();
+                sendOurKeyThread.start();
+
+                try {
+                    waitForTheirKeyThread.join();
+                    sendOurKeyThread.join();
+                } catch(InterruptedException e) {
+                    System.out.println("Error waiting for forked threads.");
+                    System.exit(1);
+                }
+
+                System.out.println("Recap:");
+                System.out.println("My key: " + exchangeKey);
+                System.out.println("Their key: " + theirKey);
+
             } else {
                 System.out.println("The proposal was not acknowledged.");
             }
