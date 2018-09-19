@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.security.SecureRandom;
 import java.util.StringTokenizer;
+import java.math.BigInteger;
 
 /**
  * Class that encapsulates all necessary means for implementing a simple
@@ -183,12 +184,17 @@ public class Peer {
 	}
 
 	private static long expmod(int a, int exp, int mod) {
+ 		/*
+ 		 * Implement efficient modular exponentiation (see java.math.BigInteger)
+ 		 */
 
-		/*
-		 * Implement efficient modular exponentiation (see java.math.BigInteger)
-		 */
+	 	BigInteger bigA = BigInteger.valueOf(a);
+		BigInteger bigExp = BigInteger.valueOf(exp);
+		BigInteger bigMod = BigInteger.valueOf(mod);
 
-		return 0;
+	 	BigInteger key = bigA.modPow(bigExp, bigMod);
+		return key.longValue();
+
 	}
 
 	/**
@@ -213,9 +219,12 @@ public class Peer {
 				throw new IllegalArgumentException("Expected PROP message.");
 			}
 
+			int a = 0;
+			int n = 0;
+
 			String[] tokenized = tokenize(message, " ");
-			int a = Integer.parseInt(tokenized[1]);
-			int n = Integer.parseInt(tokenized[2]);
+			a = Integer.parseInt(tokenized[1]);
+			n = Integer.parseInt(tokenized[2]);
 
 			if (a <= 0 || n <= 0) {
 				send("NAK");
@@ -223,6 +232,22 @@ public class Peer {
 			}
 
 			send("ACK");
+
+			/*
+				Now, create a secret x1
+			*/
+
+			SecureRandom rng = new SecureRandom();
+			int x = rng.nextInt(50) + 50;
+
+			System.out.println("My X is: " + x);
+
+			long exchangeKey = expmod(a, x, n);
+
+			System.out.println("My exchange key Y is: " + exchangeKey);
+
+			send("KEY " + exchangeKey);
+
 
 		} catch (IOException e) {
 			System.out.println("Error receiving data.");
