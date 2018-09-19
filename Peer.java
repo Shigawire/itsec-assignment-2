@@ -23,10 +23,18 @@ public class Peer {
 	private static BufferedReader inputStream;
 	private static PrintWriter outputStream;
 
+	private static long theirKey;
+	private static long ourKey;
+
+	private static void setTheirKey(long key) {
+		theirKey = key;
+	}
+
 	/**
 	 * Method use to set up the reader and writer streams for an active socket.
 	 * Used internally by waitForConnect() and connect().
 	 */
+
 	private static void setup() {
 		try {
 			inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -212,15 +220,16 @@ public class Peer {
 		 * Wait for a PROP (propose) command comprising n and a values
 		 */
 
+	 	int a = 0;
+	 	int n = 0;
+		int x = 0;
+
 		try {
 			String message = waitFor();
 
 			if (!operation(message).equals("PROP")) {
 				throw new IllegalArgumentException("Expected PROP message.");
 			}
-
-			int a = 0;
-			int n = 0;
 
 			String[] tokenized = tokenize(message, " ");
 			a = Integer.parseInt(tokenized[1]);
@@ -233,22 +242,6 @@ public class Peer {
 
 			send("ACK");
 
-			/*
-				Now, create a secret x1
-			*/
-
-			SecureRandom rng = new SecureRandom();
-			int x = rng.nextInt(50) + 50;
-
-			System.out.println("My X is: " + x);
-
-			long exchangeKey = expmod(a, x, n);
-
-			System.out.println("My exchange key Y is: " + exchangeKey);
-
-			send("KEY " + exchangeKey);
-
-
 		} catch (IOException e) {
 			System.out.println("Error receiving data.");
 			System.exit(1);
@@ -256,10 +249,64 @@ public class Peer {
 			System.out.println("Error on data exchange.");
 			System.exit(1);
 		}
-		/*
-		 * Exchange key
-		 */
 
+		/*
+			Now, create a secret x1
+		*/
+
+		SecureRandom rng = new SecureRandom();
+		x = rng.nextInt(50) + 50;
+
+		System.out.println("My X is: " + x);
+
+		final long exchangeKey = expmod(a, x, n);
+		ourKey = exchangeKey;
+
+		System.out.println("My exchange key Y is: " + ourKey);
+
+		/*
+			2 Threads: wait for their key and send out our key.
+			Then join into main thread and wait.
+		*/
+
+		Thread waitForTheirKeyThread = new Thread() {
+			public void run() {
+				try {
+					String message = waitFor();
+					if (!operation(message).equals("KEY")) {
+						throw new IllegalArgumentException("Expected key payload.");
+					}
+
+					long key = Long.valueOf(tokenize(message, " ")[1]);
+					setTheirKey(key);
+
+				} catch(IOException e) {
+					System.out.println("Error receiving data.");
+					System.exit(1);
+				}
+			}
+		};
+
+		Thread sendOurKeyThread = new Thread() {
+			public void run() {
+				send("KEY " + exchangeKey);
+			}
+		};
+
+		waitForTheirKeyThread.start();
+		sendOurKeyThread.start();
+
+		try {
+			waitForTheirKeyThread.join();
+			sendOurKeyThread.join();
+		} catch(InterruptedException e) {
+			System.out.println("Error waiting for forked threads.");
+			System.exit(1);
+		}
+
+		System.out.println("Recap:");
+		System.out.println("My key: " + exchangeKey);
+		System.out.println("Their key: " + theirKey);
 	}
 
 	/**
@@ -330,4 +377,18 @@ public class Peer {
 		}
 	}
 
+}
+
+class AsyncTask implements Runnable {
+    @Override
+    public void run() {
+        String name = Thread.currentThread().getName();
+        try {
+            System.out.printf("Start of %s\n",name);
+            Thread.sleep(1500);
+            System.out.printf("End of %s\n",name);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
