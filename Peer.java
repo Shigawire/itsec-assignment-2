@@ -344,6 +344,12 @@ public class Peer {
                 System.out.println("The proposal of a and n was acknowledged.");
 
                 x = rng.nextInt(50) + 50;
+
+                long y = expmod(a, x, n);
+
+                System.out.println("My exchange key Y is: " + y);
+
+                send("KEY " + y);
             } else {
                 System.out.println("The proposal was not acknowledged.");
             }
