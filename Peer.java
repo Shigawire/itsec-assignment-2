@@ -191,7 +191,7 @@ public class Peer {
 		return tokens[0];
 	}
 
-	private static long expmod(int a, int exp, int mod) {
+	private static long expmod(long a, long exp, int mod) {
  		/*
  		 * Implement efficient modular exponentiation (see java.math.BigInteger)
  		 */
@@ -304,9 +304,17 @@ public class Peer {
 			System.exit(1);
 		}
 
+		if (theirKey <= 0) {
+			throw new IllegalArgumentException("Expected their key to be > 0");
+		}
+
+		long sharedKey = expmod(theirKey, ourKey, n);
+
+
 		System.out.println("Recap:");
 		System.out.println("My key: " + exchangeKey);
 		System.out.println("Their key: " + theirKey);
+		System.out.println("Our shared key: " + sharedKey);
 	}
 
 	/**
