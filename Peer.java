@@ -246,40 +246,50 @@ public class Peer {
 	 *            The port to send to.
 	 */
 	private static void activeMode(String ip, int port) {
-		// SecureRandom random = new SecureRandom();
-		// int a = random.nextInt(5);
-		// int n = random.nextInt(5);
 
-		// int a = 53;
-		// int n = 123457;
+        int a = 53;
+        int n = 123457;
+        /* TODO: implement PRNG for a and n */
 
-		connect(ip, port);
+        connect(ip, port);
 
-		/*
-		 * Send PROP (propose) command comprising n and a values
-		 */
+        /*
+         * Send PROP (propose) command comprising n and a values
+         */
 
-		/*
-		 * Exchange key
-		 */
+        send("PROP " + a + " " + n);
 
-	}
+        /*
+         * Exchange key
+         */
+
+        try {
+            String answer = waitFor();
+
+            if (answer.equals("ACK")) {
+                System.out.println("The proposal of a and n was acknowledged.");
+            } else {
+                System.out.println("The proposal was not acknowledged.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
 	// ----------------------- MAIN METHOD ---------------------
 	public static void main(String[] args) {
 
-		if (args.length == 1 && args[0].equals("passive")) {
-
-			passiveMode(1234);
-
+		if (args.length < 1) {
+            System.out.println("Usage: java Peer.java <active|passive>");
 		} else {
-
-			if (args.length == 1 && args[0].equals("active")) {
-
-				activeMode("127.0.0.1", 1234);
-
+			if (args.length  == 1 && args[0].equals("passive")) {
+                passiveMode(1234);
+            } else if(args.length == 2 && args[0].equals("active")) {
+				activeMode(args[1], 1234);
 			} else {
-				System.out.println("Usage: java Peer.java <active|passive>");
+                System.out.println("Invalid arguments");
 			}
 		}
 
