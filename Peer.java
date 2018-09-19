@@ -438,14 +438,21 @@ public class Peer {
 	public static void main(String[] args) {
 
 		if (args.length < 1) {
-            System.out.println("Usage: java Peer.java <active|passive>");
+            System.out.println("Usage: java Peer.java <active passivePeerIP | passive>");
+			System.out.println("Hint: Pass ip of passive peer as second argument while launching a active peer.");
+
 		} else {
 			if (args.length  == 1 && args[0].equals("passive")) {
                 passiveMode(1234);
             } else if(args.length == 2 && args[0].equals("active")) {
+
+				/*
+				IMPORTANT HINT: PASS IP OF PASSIVE PEER AS SECOND ARGUMENT ON LAUNCH
+				 */
 				activeMode(args[1], 1234);
 			} else {
                 System.out.println("Invalid arguments");
+				System.out.println("Hint: Pass ip of passive peer as second argument while launching a active peer.");
 			}
 		}
 
